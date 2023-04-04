@@ -292,3 +292,65 @@ class FavoritesPage extends StatelessWidget {
           );
   }
 }
+
+class EditWordPage extends StatefulWidget {
+  final String word;
+
+  EditWordPage({required this.word});
+
+  @override
+  _EditWordPageState createState() => _EditWordPageState();
+}
+
+class _EditWordPageState extends State<EditWordPage> {
+  late TextEditingController _textEditingController;
+
+  @override
+  void initState() {
+    super.initState();
+    _textEditingController = TextEditingController(text: widget.word);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Edit Word'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: _textEditingController,
+              decoration: InputDecoration(
+                labelText: 'Word',
+              ),
+            ),
+            SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context, _textEditingController.text);
+              },
+              child: Text('Save'),
+            ),
+            SizedBox(height: 8.0),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancel'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _textEditingController.dispose();
+    super.dispose();
+  }
+}

@@ -234,50 +234,47 @@ class FavoritesPage extends StatelessWidget {
       );
     }
 
-    var favoritesList = ListView.builder(
-      itemCount: appState.favorites.length,
-      itemBuilder: (context, index) {
-        var pair = appState.favorites[index];
-        return ListTile(
-          title: Text(pair.asLowerCase),
-          trailing: IconButton(
-            icon: Icon(Icons.favorite),
-            onPressed: () {
-              appState.favorites.remove(pair);
-              appState.notifyListeners();
+    return appState.isCardView
+        ? GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 1.5,
+            ),
+            itemCount: appState.favorites.length,
+            itemBuilder: (context, index) {
+              final pair = appState.favorites[index];
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Card(
+                  child: ListTile(
+                    title: Text(pair.asLowerCase),
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete),
+                      onPressed: () {
+                        appState.favorites.remove(pair);
+                        appState.notifyListeners();
+                      },
+                    ),
+                  ),
+                ),
+              );
             },
-          ),
-        );
-      },
-    );
-
-    var favoritesGrid = GridView.builder(
-      itemCount: appState.favorites.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 2,
-      ),
-      itemBuilder: (context, index) {
-        var pair = appState.favorites[index];
-        return SmallCard(pair: pair);
-      },
-    );
-
-    var favoritesView = appState.isCardView ? favoritesGrid : favoritesList;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Favorites'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.view_module),
-            onPressed: () {
-              appState.toggleViewMode();
+          )
+        : ListView.builder(
+            itemCount: appState.favorites.length,
+            itemBuilder: (context, index) {
+              final pair = appState.favorites[index];
+              return ListTile(
+                title: Text(pair.asLowerCase),
+                trailing: IconButton(
+                  icon: Icon(Icons.delete),
+                  onPressed: () {
+                    appState.favorites.remove(pair);
+                    appState.notifyListeners();
+                  },
+                ),
+              );
             },
-          ),
-        ],
-      ),
-      body: favoritesView,
-    );
+          );
   }
 }

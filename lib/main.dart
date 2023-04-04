@@ -1,6 +1,7 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/src/foundation/change_notifier.dart';
 
 void main() {
   runApp(MyApp());
@@ -115,7 +116,8 @@ class _MyHomePageState extends State<MyHomePage> {
 class GeneratorPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
+    var appState = Provider.of<MyAppState>(context);
+
     var pair = appState.current;
 
     IconData icon;
@@ -156,7 +158,6 @@ class GeneratorPage extends StatelessWidget {
                 },
                 child: Text(appState.isCardView ? 'List View' : 'Card View'),
               ),
-              // Adicione o botão aqui
             ],
           ),
         ],
@@ -226,7 +227,7 @@ class BigCard extends StatelessWidget {
 class FavoritesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
+    var appState = Provider.of<MyAppState>(context);
 
     if (appState.favorites.isEmpty) {
       return Center(

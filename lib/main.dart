@@ -2,6 +2,7 @@ import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/src/foundation/change_notifier.dart';
+import 'dart:math';
 
 void main() {
   runApp(MyApp());
@@ -29,10 +30,11 @@ class MyApp extends StatelessWidget {
 class MyAppState extends ChangeNotifier {
   bool isCardView = false;
   bool isListView = false;
-  var current = WordPair.random();
+  List<WordPair> words = WordRepository.getWords();
+  var current;
 
   void getNext() {
-    current = WordPair.random();
+    current = words[Random().nextInt(words.length)];
     notifyListeners();
   }
 
@@ -50,6 +52,17 @@ class MyAppState extends ChangeNotifier {
   void toggleViewMode() {
     isListView = !isListView;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+}
+
+class WordRepository {
+  static List<WordPair> getWords() {
+    return generateWordPairs().take(20).toList();
   }
 }
 

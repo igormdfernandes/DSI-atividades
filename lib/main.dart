@@ -7,7 +7,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
         title: 'Namer App',
         theme: ThemeData(
           useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.purple),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
         ),
         home: MyHomePage(),
       ),
@@ -26,7 +26,10 @@ class MyApp extends StatelessWidget {
 }
 
 class MyAppState extends ChangeNotifier {
+  bool isCardView = false;
+  bool isListView = false;
   var current = WordPair.random();
+
   void getNext() {
     current = WordPair.random();
     notifyListeners();
@@ -40,6 +43,11 @@ class MyAppState extends ChangeNotifier {
     } else {
       favorites.add(current);
     }
+    notifyListeners();
+  }
+
+  void toggleViewMode() {
+    isListView = !isListView;
     notifyListeners();
   }
 }
@@ -72,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             SafeArea(
               child: NavigationRail(
-                extended: constraints.maxWidth >= 600, // ← Here.
+                extended: constraints.maxWidth >= 600,
                 destinations: [
                   NavigationRailDestination(
                     icon: Icon(Icons.home),
@@ -121,7 +129,7 @@ class GeneratorPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          BigCard(pair: pair),
+          appState.isCardView ? SmallCard(pair: pair) : BigCard(pair: pair),
           SizedBox(height: 10),
           Row(
             mainAxisSize: MainAxisSize.min,
@@ -140,9 +148,47 @@ class GeneratorPage extends StatelessWidget {
                 },
                 child: Text('Next'),
               ),
+              SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: () {
+                  appState.isCardView = !appState.isCardView;
+                  appState.notifyListeners();
+                },
+                child: Text(appState.isCardView ? 'List View' : 'Card View'),
+              ),
+              // Adicione o botão aqui
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class SmallCard extends StatelessWidget {
+  const SmallCard({
+    Key? key,
+    required this.pair,
+  }) : super(key: key);
+
+  final WordPair pair;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final style = theme.textTheme.subtitle1!.copyWith(
+      color: theme.colorScheme.onPrimary,
+    );
+
+    return Card(
+      color: theme.colorScheme.primary,
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Text(
+          pair.asLowerCase,
+          style: style,
+          semanticsLabel: "${pair.first} ${pair.second}",
+        ),
       ),
     );
   }
@@ -162,6 +208,7 @@ class BigCard extends StatelessWidget {
     final style = theme.textTheme.displayMedium!.copyWith(
       color: theme.colorScheme.onPrimary,
     );
+
     return Card(
       color: theme.colorScheme.primary,
       child: Padding(
@@ -187,19 +234,50 @@ class FavoritesPage extends StatelessWidget {
       );
     }
 
-    return ListView(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: Text('You have '
-              '${appState.favorites.length} favorites:'),
-        ),
-        for (var pair in appState.favorites)
-          ListTile(
-            leading: Icon(Icons.favorite),
-            title: Text(pair.asLowerCase),
+    var favoritesList = ListView.builder(
+      itemCount: appState.favorites.length,
+      itemBuilder: (context, index) {
+        var pair = appState.favorites[index];
+        return ListTile(
+          title: Text(pair.asLowerCase),
+          trailing: IconButton(
+            icon: Icon(Icons.favorite),
+            onPressed: () {
+              appState.favorites.remove(pair);
+              appState.notifyListeners();
+            },
           ),
-      ],
+        );
+      },
+    );
+
+    var favoritesGrid = GridView.builder(
+      itemCount: appState.favorites.length,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 2,
+      ),
+      itemBuilder: (context, index) {
+        var pair = appState.favorites[index];
+        return SmallCard(pair: pair);
+      },
+    );
+
+    var favoritesView = appState.isCardView ? favoritesGrid : favoritesList;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Favorites'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.view_module),
+            onPressed: () {
+              appState.toggleViewMode();
+            },
+          ),
+        ],
+      ),
+      body: favoritesView,
     );
   }
 }
